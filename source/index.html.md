@@ -1,15 +1,12 @@
 ---
-title: API Reference
+title: Golem Task API
 
 language_tabs: # must be one of https://git.io/vQNgJ
-  - shell
-  - ruby
-  - python
-  - javascript
+  - protobuf
 
 toc_footers:
   - <a href='#'>Sign Up for a Developer Key</a>
-  - <a href='https://github.com/lord/slate'>Documentation Powered by Slate</a>
+  - <a href='https://docs.golem.network'>Main documentation</a>
 
 includes:
   - errors
@@ -17,223 +14,250 @@ includes:
 search: true
 ---
 
-# Introduction
+# Task-api
 
-Welcome to the Kittn API! You can use our API to access Kittn API endpoints, which can get information on various cats, kittens, and breeds in our database.
+### Golem - application communication interface
 
-We have language bindings in Shell, Ruby, Python, and JavaScript! You can view code examples in the dark area to the right, and you can switch the programming language of the examples with the tabs in the top right.
+<aside class="notice">This work is in it's alpha stage and under heavy development so the interface may change frequently.</aside>
 
-This example API documentation page was created with [Slate](https://github.com/lord/slate). Feel free to edit it and use it as a base for your own API's documentation.
+This repository contains the interface that the Golem compatible application should implement as well as constants used by the protocol. The interface and the constants are defined under the `golem_task_api/proto` directory in the [Protocol Buffers](https://developers.google.com/protocol-buffers/) files.
 
-# Authentication
+This repository also contains programming language specific packages of the `gRPC` protocol which may be used for concrete implementation. This is for the ease of development of the application but it's not required to use them in the application.
+If you don't see a programming language you're interested in, feel free to create an issue or even a pull request and we will add it.
 
-> To authorize, use this code:
 
-```ruby
-require 'kittn'
+# The API
 
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-```
+The API is divided into two independent parts - **requestor** and **provider**.
 
-```python
-import kittn
+### Requestor
+> Requestor
 
-api = kittn.authorize('meowmeowmeow')
-```
+```proto
+service RequestorApp {
+  rpc CreateTask (CreateTaskRequest) returns (CreateTaskReply) {}
+  rpc NextSubtask (NextSubtaskRequest) returns (NextSubtaskReply) {}
+  rpc Verify (VerifyRequest) returns (VerifyReply) {}
+  rpc DiscardSubtasks (DiscardSubtasksRequest) returns (DiscardSubtasksReply) {}
+  rpc RunBenchmark (RunBenchmarkRequest) returns (RunBenchmarkReply) {}
+  rpc HasPendingSubtasks (HasPendingSubtasksRequest) returns (HasPendingSubtasksReply) {}
 
-```shell
-# With shell, you can just pass the correct header with each request
-curl "api_endpoint_here"
-  -H "Authorization: meowmeowmeow"
-```
-
-```javascript
-const kittn = require('kittn');
-
-let api = kittn.authorize('meowmeowmeow');
-```
-
-> Make sure to replace `meowmeowmeow` with your API key.
-
-Kittn uses API keys to allow access to the API. You can register a new Kittn API key at our [developer portal](http://example.com/developers).
-
-Kittn expects for the API key to be included in all API requests to the server in a header that looks like the following:
-
-`Authorization: meowmeowmeow`
-
-<aside class="notice">
-You must replace <code>meowmeowmeow</code> with your personal API key.
-</aside>
-
-# Kittens
-
-## Get All Kittens
-
-```ruby
-require 'kittn'
-
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-api.kittens.get
-```
-
-```python
-import kittn
-
-api = kittn.authorize('meowmeowmeow')
-api.kittens.get()
-```
-
-```shell
-curl "http://example.com/api/kittens"
-  -H "Authorization: meowmeowmeow"
-```
-
-```javascript
-const kittn = require('kittn');
-
-let api = kittn.authorize('meowmeowmeow');
-let kittens = api.kittens.get();
-```
-
-> The above command returns JSON structured like this:
-
-```json
-[
-  {
-    "id": 1,
-    "name": "Fluffums",
-    "breed": "calico",
-    "fluffiness": 6,
-    "cuteness": 7
-  },
-  {
-    "id": 2,
-    "name": "Max",
-    "breed": "unknown",
-    "fluffiness": 5,
-    "cuteness": 10
-  }
-]
-```
-
-This endpoint retrieves all kittens.
-
-### HTTP Request
-
-`GET http://example.com/api/kittens`
-
-### Query Parameters
-
-Parameter | Default | Description
---------- | ------- | -----------
-include_cats | false | If set to true, the result will also include cats.
-available | true | If set to false, the result will include kittens that have already been adopted.
-
-<aside class="success">
-Remember — a happy kitten is an authenticated kitten!
-</aside>
-
-## Get a Specific Kitten
-
-```ruby
-require 'kittn'
-
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-api.kittens.get(2)
-```
-
-```python
-import kittn
-
-api = kittn.authorize('meowmeowmeow')
-api.kittens.get(2)
-```
-
-```shell
-curl "http://example.com/api/kittens/2"
-  -H "Authorization: meowmeowmeow"
-```
-
-```javascript
-const kittn = require('kittn');
-
-let api = kittn.authorize('meowmeowmeow');
-let max = api.kittens.get(2);
-```
-
-> The above command returns JSON structured like this:
-
-```json
-{
-  "id": 2,
-  "name": "Max",
-  "breed": "unknown",
-  "fluffiness": 5,
-  "cuteness": 10
+  rpc Shutdown (ShutdownRequest) returns (ShutdownReply) {}
 }
 ```
 
-This endpoint retrieves a specific kitten.
+For requestor the app should implement a long running RPC service which implements the `RequestorApp` interface from the proto files. 
+The app should assume it will have access to a single directory (let's call it `work_dir`). Each task will have its own separate working directory under the main `work_dir`. You can assume that for a given `task_id` the first call will always be `CreateTask` and the following directories will exist under `work_dir` and they will be empty:
 
-<aside class="warning">Inside HTML code blocks like this one, you can't use Markdown, so use <code>&lt;code&gt;</code> blocks to denote code.</aside>
+- `{task_id}`
 
-### HTTP Request
+- `{task_id}/{constants.RESOURCES}`
 
-`GET http://example.com/kittens/<ID>`
+- `{task_id}/{constants.NETWORK_RESOURCES}`
 
-### URL Parameters
+- `{task_id}/{constants.RESULTS}`
 
-Parameter | Description
---------- | -----------
-ID | The ID of the kitten to retrieve
+- `{task_id}/{constants.NETWORK_RESULTS}`
 
-## Delete a Specific Kitten
+---
+#### RPC methods
 
-```ruby
-require 'kittn'
 
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-api.kittens.delete(2)
+#### `CreateTask`
+
+```proto
+rpc CreateTask (CreateTaskRequest) returns (CreateTaskReply) {}
+
+message CreateTaskRequest {
+  string task_id = 1;
+  string task_params_json = 2;
+}
+
+message CreateTaskReply {
+}
 ```
+  - takes two arguments `task_id` and `task_params_json`
 
-```python
-import kittn
+  - should treat `{work_dir}/{task_id}` as the working directory for the given task
 
-api = kittn.authorize('meowmeowmeow')
-api.kittens.delete(2)
+  - `task_params_json` is a JSON string containing task specific parameters
+
+  - will only be called once with given `task_id`
+
+  - can assume `{task_id}/{constants.RESOURCES}` contains all the resources provided by task creator
+
+---
+
+#### `NextSubtask`
+
+```proto
+rpc NextSubtask (NextSubtaskRequest) returns (NextSubtaskReply) {}
+
+message NextSubtaskRequest {
+    string task_id = 1;
+}
+
+message NextSubtaskReply {
+  string subtask_id = 1;
+  string subtask_params_json = 2;
+  repeated string resources = 3;
+}
 ```
+  - takes one argument `task_id`
 
-```shell
-curl "http://example.com/api/kittens/2"
-  -X DELETE
-  -H "Authorization: meowmeowmeow"
+  - can assume `CreateTask` was called earlier with the same `task_id`
+
+  - returns `subtask_id` which has to be a string without whitespaces and slashes (`/`) but the same string cannot be returned more than once
+
+  - also returns `subtask_params_json` which is the JSON string containing subtask specific parameters
+
+---
+
+#### `HasPendingSubtasks`
+
+```proto
+rpc HasPendingSubtasks (HasPendingSubtasksRequest) returns (HasPendingSubtasksReply) {}
+
+message HasPendingSubtasksRequest {
+  string task_id = 1;
+}
+
+message HasPendingSubtasksReply {
+  bool has_pending_subtasks = 1;
+}
 ```
+  - takes one argument `task_id`
 
-```javascript
-const kittn = require('kittn');
+  - returns a boolean indicating whether there are any more pending subtasks waiting for computation at given moment
 
-let api = kittn.authorize('meowmeowmeow');
-let max = api.kittens.delete(2);
-```
+  - in case when it returns `true`, the next `NextSubtask` call should return successfully
 
-> The above command returns JSON structured like this:
+---
 
-```json
-{
-  "id": 2,
-  "deleted" : ":("
+#### `Verify`
+
+```proto
+rpc Verify (VerifyRequest) returns (VerifyReply) {}
+
+message VerifyRequest {
+  string task_id = 1;
+  string subtask_id = 2;
+}
+
+message VerifyReply {
+  bool success = 1;
+}
+```  
+  - takes two arguments, `task_id` and `subtask_id` which specify which subtask results should be verified
+
+  - will be called with only valid `task_id` and `subtask_id` values
+
+  - returns a boolean indicating whether results passed the verification or not
+
+  - for successfully verified subtasks it most likely should also perform merging the partial results into the final one
+
+---
+
+#### `DiscardSubtasks`
+
+```proto
+rpc DiscardSubtasks (DiscardSubtasksRequest) returns (DiscardSubtasksReply) {}
+
+message DiscardSubtasksRequest {
+  string task_id = 1;
+  repeated string subtask_ids = 2;
+}
+
+message DiscardSubtasksReply {
+  repeated string discarded_subtask_ids = 1;
+}
+```  
+  - takes two arguments, `task_id` and `subtask_ids`
+
+  - should discard results of given subtasks and any dependent subtasks
+
+  - returns list of subtask IDs that have been discarded
+
+  - in a simple case where subtasks are independent from each other it will return the same list as it received
+
+---
+
+#### `Benchmark`
+
+```proto
+rpc RunBenchmark (RunBenchmarkRequest) returns (RunBenchmarkReply) {}
+
+message RunBenchmarkRequest {
+}
+
+message RunBenchmarkReply {
+  float score = 1;
+}
+
+``` 
+  - takes no arguments
+
+  - returns a score which indicates how efficient the machine is for this type of tasks
+
+  - shouldn't take much time (preferably less than a minute for medium range machines)
+
+---
+
+#### `Shutdown`
+
+```proto
+rpc Shutdown (ShutdownRequest) returns (ShutdownReply) {}
+
+message ShutdownRequest {
+}
+
+message ShutdownReply {
+}
+
+``` 
+  - takes no arguments
+
+  - should gracefully terminate the service
+
+When the last subtask is successfully verified on the requestor's side, the `work_dir/task_id/constants.RESULTS` directory should contain all result files and nothing else.
+
+---
+
+### Provider
+
+```proto
+service ProviderApp {
+  rpc Compute (ComputeRequest) returns (ComputeReply) {}
+  rpc RunBenchmark (RunBenchmarkRequest) returns (RunBenchmarkReply) {}
 }
 ```
 
-This endpoint deletes a specific kitten.
+Provider app should implement a short-lived RPC service which implements the `ProviderApp` interface from the proto files. Short-lived means that there will be only one request issued per service instance, i.e. the service should shutdown automatically after handling the first and only request.
 
-### HTTP Request
 
-`DELETE http://example.com/kittens/<ID>`
+#### RPC commands
 
-### URL Parameters
+#### `Compute`
 
-Parameter | Description
---------- | -----------
-ID | The ID of the kitten to delete
+  - gets a single working directory `task_work_dir` to operate on
+
+  - different subtasks of the same task will have the same `task_work_dir`
+
+  - takes `task_id`, `subtask_id`, `subtask_params_json` as arguments
+
+  - can assume the `{task_work_dir}/{constants.NETWORK_RESOURCES}` directory exists
+
+  - can assume that under `{task_work_dir}/{constants.NETWORK_RESOURCES}` are the resources specified in the corresponding `NextSubtask` call
+
+  - returns a filepath (relative to the `task_work_dir`) of the result file which will be sent back to the requestor with unchanged name
+
+#### `Benchmark`
+
+  - takes no arguments
+
+  - returns a score which indicates how efficient the machine is for this type of tasks
+
+  - shouldn't take much time (preferably less than a minute for medium range machines)
+
+
 

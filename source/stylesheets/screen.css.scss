@@ -36,6 +36,12 @@ html, body {
   -webkit-text-size-adjust: none; /* Never autoresize text */
 }
 
+@import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro&display=swap');html {
+  font-family: sans-serif;
+  -ms-text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // TABLE OF CONTENTS
 ////////////////////////////////////////////////////////////////////////////////
@@ -48,6 +54,7 @@ html, body {
 }
 
 .toc-wrapper {
+  border-right: 1px solid #eee;
   transition: left 0.3s ease-in-out;
 
   overflow-y: auto;
@@ -59,8 +66,9 @@ html, body {
   bottom: 0;
   width: $nav-width;
   background-color: $nav-bg;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: bold;
+  margin-bottom: 15px;
 
   // language selector for mobile devices
   .lang-selector {
@@ -74,8 +82,8 @@ html, body {
   // This is the logo at the top of the ToC
   .logo {
     display: block;
-    max-width: 100%;
-    margin-bottom: $logo-margin;
+    max-width: 60%;
+    margin: 30px;
   }
 
   &>.search {
@@ -140,7 +148,7 @@ html, body {
   ul, li {
     list-style: none;
     margin: 0;
-    padding: 0;
+    padding: 4px;
     line-height: 28px;
   }
 
@@ -166,12 +174,12 @@ html, body {
   .toc-list-h2 {
     display: none;
     background-color: $nav-subitem-bg;
-    font-weight: 500;
+    font-weight: 400;
   }
 
   .toc-h2 {
-    padding-left: $nav-padding + $nav-indent;
-    font-size: 12px;
+    padding-left: $nav-padding + 3px;
+    font-size: 14px;
   }
 
   .toc-footer {
@@ -189,7 +197,7 @@ html, body {
     }
 
     li {
-      font-size: 0.8em;
+      font-size: 0.6em;
       line-height: 1.7;
       text-decoration: none;
     }
@@ -346,14 +354,13 @@ html, body {
 
   h1 {
     @extend %header-font;
-    font-size: 25px;
-    padding-top: 0.5em;
+    font-size: 32px;
+    padding-top: 1.7em;
     padding-bottom: 0.5em;
     margin-bottom: $h1-margin-bottom;
-    margin-top: 2em;
-    border-top: 1px solid #ccc;
-    border-bottom: 1px solid #ccc;
-    background-color: #fdfdfd;
+    margin-top: 1.2em;
+    border-top: 1px solid #eee;
+    background-color: #fff;
   }
 
   h1:first-child, div:first-child + h1 {
@@ -363,10 +370,10 @@ html, body {
 
   h2 {
     @extend %header-font;
-    font-size: 19px;
+    font-size: 28px;
     margin-top: 4em;
     margin-bottom: 0;
-    border-top: 1px solid #ccc;
+    border-top: 1px solid #eee;
     padding-top: 1.2em;
     padding-bottom: 1.2em;
     background-image: linear-gradient(to bottom, rgba(#fff, 0.2), rgba(#fff, 0));
@@ -381,19 +388,19 @@ html, body {
 
   h3, h4, h5, h6 {
     @extend %header-font;
-    font-size: 15px;
+    font-size: 24px;
     margin-top: 2.5em;
     margin-bottom: 0.8em;
   }
 
   h4, h5, h6 {
-    font-size: 10px;
+    font-size: 18px;
   }
 
   hr {
-    margin: 2em 0;
-    border-top: 2px solid $examples-bg;
-    border-bottom: 2px solid $main-bg;
+    margin: 4em 4em;
+    border-top: 0px solid $examples-bg;
+    border-bottom: 0px solid $main-bg;
   }
 
   table {
@@ -410,7 +417,7 @@ html, body {
 
     th {
       padding: 5px 10px;
-      border-bottom: 1px solid #ccc;
+      border-bottom: 1px solid #eee;
       vertical-align: bottom;
     }
 
@@ -419,7 +426,7 @@ html, body {
     }
 
     tr:last-child {
-      border-bottom: 1px solid #ccc;
+      border-bottom: 1px solid #eee;
     }
 
     tr:nth-child(odd)>td {
@@ -442,6 +449,11 @@ html, body {
   p, li, dt, dd {
     line-height: 1.6;
     margin-top: 0;
+
+    & a {
+    font-weight: bold;
+    color: #0c78ff;
+    }
   }
 
   img {
@@ -536,15 +548,15 @@ html, body {
 
   pre {
     @extend %code-font;
-    padding-top: 2em;
+    padding-top: 2.5em;
     padding-bottom: 2em;
-    padding: 2em $main-padding;
+    padding: 2.5em $main-padding;
   }
 
   blockquote {
     &>p {
       background-color: $code-annotation-bg;
-      padding: $code-annotation-padding 2em;
+      padding: $code-annotation-padding 2.5em;
       color: #eee;
     }
   }
