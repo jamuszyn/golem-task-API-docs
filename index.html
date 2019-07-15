@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <title>API Reference</title>
+    <title>Golem Task API</title>
 
     <style>
       .highlight table td { padding: 5px; }
@@ -201,7 +201,7 @@
       <script src="javascripts/all.js"></script>
   </head>
 
-  <body class="index" data-languages="[&quot;shell&quot;,&quot;ruby&quot;,&quot;python&quot;,&quot;javascript&quot;]">
+  <body class="index" data-languages="[&quot;protobuf&quot;]">
     <a href="#" id="nav-button">
       <span>
         NAV
@@ -209,12 +209,9 @@
       </span>
     </a>
     <div class="toc-wrapper">
-      <img src="images/logo.png" class="logo" alt="Logo" />
+      <img src="images/logo.svg" class="logo" alt="Logo" />
         <div class="lang-selector">
-              <a href="#" data-language-name="shell">shell</a>
-              <a href="#" data-language-name="ruby">ruby</a>
-              <a href="#" data-language-name="python">python</a>
-              <a href="#" data-language-name="javascript">javascript</a>
+              <a href="#" data-language-name="protobuf">protobuf</a>
         </div>
         <div class="search">
           <input type="text" class="search" id="input-search" placeholder="Search">
@@ -222,22 +219,21 @@
         <ul class="search-results"></ul>
       <ul id="toc" class="toc-list-h1">
           <li>
-            <a href="#introduction" class="toc-h1 toc-link" data-title="Introduction">Introduction</a>
-          </li>
-          <li>
-            <a href="#authentication" class="toc-h1 toc-link" data-title="Authentication">Authentication</a>
-          </li>
-          <li>
-            <a href="#kittens" class="toc-h1 toc-link" data-title="Kittens">Kittens</a>
+            <a href="#task-api" class="toc-h1 toc-link" data-title="Task-api">Task-api</a>
               <ul class="toc-list-h2">
                   <li>
-                    <a href="#get-all-kittens" class="toc-h2 toc-link" data-title="Get All Kittens">Get All Kittens</a>
+                    <a href="#golem-application-communication-interface" class="toc-h2 toc-link" data-title="Golem - application communication interface">Golem - application communication interface</a>
+                  </li>
+              </ul>
+          </li>
+          <li>
+            <a href="#the-api" class="toc-h1 toc-link" data-title="The API">The API</a>
+              <ul class="toc-list-h2">
+                  <li>
+                    <a href="#requestor" class="toc-h2 toc-link" data-title="Requestor">Requestor</a>
                   </li>
                   <li>
-                    <a href="#get-a-specific-kitten" class="toc-h2 toc-link" data-title="Get a Specific Kitten">Get a Specific Kitten</a>
-                  </li>
-                  <li>
-                    <a href="#delete-a-specific-kitten" class="toc-h2 toc-link" data-title="Delete a Specific Kitten">Delete a Specific Kitten</a>
+                    <a href="#provider" class="toc-h2 toc-link" data-title="Provider">Provider</a>
                   </li>
               </ul>
           </li>
@@ -247,191 +243,197 @@
       </ul>
         <ul class="toc-footer">
             <li><a href='#'>Sign Up for a Developer Key</a></li>
-            <li><a href='https://github.com/lord/slate'>Documentation Powered by Slate</a></li>
+            <li><a href='https://docs.golem.network'>Main documentation</a></li>
         </ul>
     </div>
     <div class="page-wrapper">
       <div class="dark-box"></div>
       <div class="content">
-        <h1 id='introduction'>Introduction</h1>
-<p>Welcome to the Kittn API! You can use our API to access Kittn API endpoints, which can get information on various cats, kittens, and breeds in our database.</p>
+        <h1 id='task-api'>Task-api</h1><h3 id='golem-application-communication-interface'>Golem - application communication interface</h3>
+<aside class="notice">This work is in it's alpha stage and under heavy development so the interface may change frequently.</aside>
 
-<p>We have language bindings in Shell, Ruby, Python, and JavaScript! You can view code examples in the dark area to the right, and you can switch the programming language of the examples with the tabs in the top right.</p>
+<p>This repository contains the interface that the Golem compatible application should implement as well as constants used by the protocol. The interface and the constants are defined under the <code>golem_task_api/proto</code> directory in the <a href="https://developers.google.com/protocol-buffers/">Protocol Buffers</a> files.</p>
 
-<p>This example API documentation page was created with <a href="https://github.com/lord/slate">Slate</a>. Feel free to edit it and use it as a base for your own API&#39;s documentation.</p>
-<h1 id='authentication'>Authentication</h1>
+<p>This repository also contains programming language specific packages of the <code>gRPC</code> protocol which may be used for concrete implementation. This is for the ease of development of the application but it&#39;s not required to use them in the application.
+If you don&#39;t see a programming language you&#39;re interested in, feel free to create an issue or even a pull request and we will add it.</p>
+<h1 id='the-api'>The API</h1>
+<p>The API is divided into two independent parts - <strong>requestor</strong> and <strong>provider</strong>.</p>
+<h3 id='requestor'>Requestor</h3>
 <blockquote>
-<p>To authorize, use this code:</p>
+<p>Requestor</p>
 </blockquote>
-<pre class="highlight ruby tab-ruby"><code><span class="nb">require</span> <span class="s1">'kittn'</span>
+<pre class="highlight proto tab-protobuf"><code><span class="kd">service</span> <span class="n">RequestorApp</span> <span class="p">{</span>
+  <span class="k">rpc</span> <span class="n">CreateTask</span> <span class="p">(</span><span class="n">CreateTaskRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">CreateTaskReply</span><span class="p">)</span> <span class="p">{}</span>
+  <span class="k">rpc</span> <span class="n">NextSubtask</span> <span class="p">(</span><span class="n">NextSubtaskRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">NextSubtaskReply</span><span class="p">)</span> <span class="p">{}</span>
+  <span class="k">rpc</span> <span class="n">Verify</span> <span class="p">(</span><span class="n">VerifyRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">VerifyReply</span><span class="p">)</span> <span class="p">{}</span>
+  <span class="k">rpc</span> <span class="n">DiscardSubtasks</span> <span class="p">(</span><span class="n">DiscardSubtasksRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">DiscardSubtasksReply</span><span class="p">)</span> <span class="p">{}</span>
+  <span class="k">rpc</span> <span class="n">RunBenchmark</span> <span class="p">(</span><span class="n">RunBenchmarkRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">RunBenchmarkReply</span><span class="p">)</span> <span class="p">{}</span>
+  <span class="k">rpc</span> <span class="n">HasPendingSubtasks</span> <span class="p">(</span><span class="n">HasPendingSubtasksRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">HasPendingSubtasksReply</span><span class="p">)</span> <span class="p">{}</span>
 
-<span class="n">api</span> <span class="o">=</span> <span class="no">Kittn</span><span class="o">::</span><span class="no">APIClient</span><span class="p">.</span><span class="nf">authorize!</span><span class="p">(</span><span class="s1">'meowmeowmeow'</span><span class="p">)</span>
-</code></pre><pre class="highlight python tab-python"><code><span class="kn">import</span> <span class="nn">kittn</span>
-
-<span class="n">api</span> <span class="o">=</span> <span class="n">kittn</span><span class="o">.</span><span class="n">authorize</span><span class="p">(</span><span class="s">'meowmeowmeow'</span><span class="p">)</span>
-</code></pre><pre class="highlight shell tab-shell"><code><span class="c"># With shell, you can just pass the correct header with each request</span>
-curl <span class="s2">"api_endpoint_here"</span>
-  -H <span class="s2">"Authorization: meowmeowmeow"</span>
-</code></pre><pre class="highlight javascript tab-javascript"><code><span class="kr">const</span> <span class="nx">kittn</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'kittn'</span><span class="p">);</span>
-
-<span class="kd">let</span> <span class="nx">api</span> <span class="o">=</span> <span class="nx">kittn</span><span class="p">.</span><span class="nx">authorize</span><span class="p">(</span><span class="s1">'meowmeowmeow'</span><span class="p">);</span>
+  <span class="k">rpc</span> <span class="n">Shutdown</span> <span class="p">(</span><span class="n">ShutdownRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">ShutdownReply</span><span class="p">)</span> <span class="p">{}</span>
+<span class="p">}</span>
 </code></pre>
-<blockquote>
-<p>Make sure to replace <code>meowmeowmeow</code> with your API key.</p>
-</blockquote>
+<p>For requestor the app should implement a long running RPC service which implements the <code>RequestorApp</code> interface from the proto files. 
+The app should assume it will have access to a single directory (let&#39;s call it <code>work_dir</code>). Each task will have its own separate working directory under the main <code>work_dir</code>. You can assume that for a given <code>task_id</code> the first call will always be <code>CreateTask</code> and the following directories will exist under <code>work_dir</code> and they will be empty:</p>
 
-<p>Kittn uses API keys to allow access to the API. You can register a new Kittn API key at our <a href="http://example.com/developers">developer portal</a>.</p>
+<ul>
+<li><p><code>{task_id}</code></p></li>
+<li><p><code>{task_id}/{constants.RESOURCES}</code></p></li>
+<li><p><code>{task_id}/{constants.NETWORK_RESOURCES}</code></p></li>
+<li><p><code>{task_id}/{constants.RESULTS}</code></p></li>
+<li><p><code>{task_id}/{constants.NETWORK_RESULTS}</code></p></li>
+</ul>
 
-<p>Kittn expects for the API key to be included in all API requests to the server in a header that looks like the following:</p>
+<hr>
+<h4 id='rpc-methods'>RPC methods</h4><h4 id='createtask'><code>CreateTask</code></h4><pre class="highlight proto tab-protobuf"><code><span class="k">rpc</span> <span class="n">CreateTask</span> <span class="p">(</span><span class="n">CreateTaskRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">CreateTaskReply</span><span class="p">)</span> <span class="p">{}</span>
 
-<p><code>Authorization: meowmeowmeow</code></p>
+<span class="kd">message</span> <span class="nc">CreateTaskRequest</span> <span class="p">{</span>
+  <span class="kt">string</span> <span class="na">task_id</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="kt">string</span> <span class="na">task_params_json</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+<span class="p">}</span>
 
-<aside class="notice">
-You must replace <code>meowmeowmeow</code> with your personal API key.
-</aside>
-<h1 id='kittens'>Kittens</h1><h2 id='get-all-kittens'>Get All Kittens</h2><pre class="highlight ruby tab-ruby"><code><span class="nb">require</span> <span class="s1">'kittn'</span>
-
-<span class="n">api</span> <span class="o">=</span> <span class="no">Kittn</span><span class="o">::</span><span class="no">APIClient</span><span class="p">.</span><span class="nf">authorize!</span><span class="p">(</span><span class="s1">'meowmeowmeow'</span><span class="p">)</span>
-<span class="n">api</span><span class="p">.</span><span class="nf">kittens</span><span class="p">.</span><span class="nf">get</span>
-</code></pre><pre class="highlight python tab-python"><code><span class="kn">import</span> <span class="nn">kittn</span>
-
-<span class="n">api</span> <span class="o">=</span> <span class="n">kittn</span><span class="o">.</span><span class="n">authorize</span><span class="p">(</span><span class="s">'meowmeowmeow'</span><span class="p">)</span>
-<span class="n">api</span><span class="o">.</span><span class="n">kittens</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
-</code></pre><pre class="highlight shell tab-shell"><code>curl <span class="s2">"http://example.com/api/kittens"</span>
-  -H <span class="s2">"Authorization: meowmeowmeow"</span>
-</code></pre><pre class="highlight javascript tab-javascript"><code><span class="kr">const</span> <span class="nx">kittn</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'kittn'</span><span class="p">);</span>
-
-<span class="kd">let</span> <span class="nx">api</span> <span class="o">=</span> <span class="nx">kittn</span><span class="p">.</span><span class="nx">authorize</span><span class="p">(</span><span class="s1">'meowmeowmeow'</span><span class="p">);</span>
-<span class="kd">let</span> <span class="nx">kittens</span> <span class="o">=</span> <span class="nx">api</span><span class="p">.</span><span class="nx">kittens</span><span class="p">.</span><span class="nx">get</span><span class="p">();</span>
+<span class="kd">message</span> <span class="nc">CreateTaskReply</span> <span class="p">{</span>
+<span class="p">}</span>
 </code></pre>
-<blockquote>
-<p>The above command returns JSON structured like this:</p>
-</blockquote>
-<pre class="highlight json tab-json"><code><span class="p">[</span><span class="w">
-  </span><span class="p">{</span><span class="w">
-    </span><span class="s2">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-    </span><span class="s2">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Fluffums"</span><span class="p">,</span><span class="w">
-    </span><span class="s2">"breed"</span><span class="p">:</span><span class="w"> </span><span class="s2">"calico"</span><span class="p">,</span><span class="w">
-    </span><span class="s2">"fluffiness"</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span><span class="w">
-    </span><span class="s2">"cuteness"</span><span class="p">:</span><span class="w"> </span><span class="mi">7</span><span class="w">
-  </span><span class="p">},</span><span class="w">
-  </span><span class="p">{</span><span class="w">
-    </span><span class="s2">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w">
-    </span><span class="s2">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Max"</span><span class="p">,</span><span class="w">
-    </span><span class="s2">"breed"</span><span class="p">:</span><span class="w"> </span><span class="s2">"unknown"</span><span class="p">,</span><span class="w">
-    </span><span class="s2">"fluffiness"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w">
-    </span><span class="s2">"cuteness"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="w">
-  </span><span class="p">}</span><span class="w">
-</span><span class="p">]</span><span class="w">
-</span></code></pre>
-<p>This endpoint retrieves all kittens.</p>
-<h3 id='http-request'>HTTP Request</h3>
-<p><code>GET http://example.com/api/kittens</code></p>
-<h3 id='query-parameters'>Query Parameters</h3>
-<table><thead>
-<tr>
-<th>Parameter</th>
-<th>Default</th>
-<th>Description</th>
-</tr>
-</thead><tbody>
-<tr>
-<td>include_cats</td>
-<td>false</td>
-<td>If set to true, the result will also include cats.</td>
-</tr>
-<tr>
-<td>available</td>
-<td>true</td>
-<td>If set to false, the result will include kittens that have already been adopted.</td>
-</tr>
-</tbody></table>
+<ul>
+<li><p>takes two arguments <code>task_id</code> and <code>task_params_json</code></p></li>
+<li><p>should treat <code>{work_dir}/{task_id}</code> as the working directory for the given task</p></li>
+<li><p><code>task_params_json</code> is a JSON string containing task specific parameters</p></li>
+<li><p>will only be called once with given <code>task_id</code></p></li>
+<li><p>can assume <code>{task_id}/{constants.RESOURCES}</code> contains all the resources provided by task creator</p></li>
+</ul>
 
-<aside class="success">
-Remember — a happy kitten is an authenticated kitten!
-</aside>
-<h2 id='get-a-specific-kitten'>Get a Specific Kitten</h2><pre class="highlight ruby tab-ruby"><code><span class="nb">require</span> <span class="s1">'kittn'</span>
+<hr>
+<h4 id='nextsubtask'><code>NextSubtask</code></h4><pre class="highlight proto tab-protobuf"><code><span class="k">rpc</span> <span class="n">NextSubtask</span> <span class="p">(</span><span class="n">NextSubtaskRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">NextSubtaskReply</span><span class="p">)</span> <span class="p">{}</span>
 
-<span class="n">api</span> <span class="o">=</span> <span class="no">Kittn</span><span class="o">::</span><span class="no">APIClient</span><span class="p">.</span><span class="nf">authorize!</span><span class="p">(</span><span class="s1">'meowmeowmeow'</span><span class="p">)</span>
-<span class="n">api</span><span class="p">.</span><span class="nf">kittens</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</code></pre><pre class="highlight python tab-python"><code><span class="kn">import</span> <span class="nn">kittn</span>
+<span class="kd">message</span> <span class="nc">NextSubtaskRequest</span> <span class="p">{</span>
+    <span class="kt">string</span> <span class="na">task_id</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
 
-<span class="n">api</span> <span class="o">=</span> <span class="n">kittn</span><span class="o">.</span><span class="n">authorize</span><span class="p">(</span><span class="s">'meowmeowmeow'</span><span class="p">)</span>
-<span class="n">api</span><span class="o">.</span><span class="n">kittens</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</code></pre><pre class="highlight shell tab-shell"><code>curl <span class="s2">"http://example.com/api/kittens/2"</span>
-  -H <span class="s2">"Authorization: meowmeowmeow"</span>
-</code></pre><pre class="highlight javascript tab-javascript"><code><span class="kr">const</span> <span class="nx">kittn</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'kittn'</span><span class="p">);</span>
-
-<span class="kd">let</span> <span class="nx">api</span> <span class="o">=</span> <span class="nx">kittn</span><span class="p">.</span><span class="nx">authorize</span><span class="p">(</span><span class="s1">'meowmeowmeow'</span><span class="p">);</span>
-<span class="kd">let</span> <span class="nx">max</span> <span class="o">=</span> <span class="nx">api</span><span class="p">.</span><span class="nx">kittens</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+<span class="kd">message</span> <span class="nc">NextSubtaskReply</span> <span class="p">{</span>
+  <span class="kt">string</span> <span class="na">subtask_id</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="kt">string</span> <span class="na">subtask_params_json</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+  <span class="k">repeated</span> <span class="kt">string</span> <span class="na">resources</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
+<span class="p">}</span>
 </code></pre>
-<blockquote>
-<p>The above command returns JSON structured like this:</p>
-</blockquote>
-<pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
-  </span><span class="s2">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w">
-  </span><span class="s2">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Max"</span><span class="p">,</span><span class="w">
-  </span><span class="s2">"breed"</span><span class="p">:</span><span class="w"> </span><span class="s2">"unknown"</span><span class="p">,</span><span class="w">
-  </span><span class="s2">"fluffiness"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w">
-  </span><span class="s2">"cuteness"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="w">
-</span><span class="p">}</span><span class="w">
-</span></code></pre>
-<p>This endpoint retrieves a specific kitten.</p>
+<ul>
+<li><p>takes one argument <code>task_id</code></p></li>
+<li><p>can assume <code>CreateTask</code> was called earlier with the same <code>task_id</code></p></li>
+<li><p>returns <code>subtask_id</code> which has to be a string without whitespaces and slashes (<code>/</code>) but the same string cannot be returned more than once</p></li>
+<li><p>also returns <code>subtask_params_json</code> which is the JSON string containing subtask specific parameters</p></li>
+</ul>
 
-<aside class="warning">Inside HTML code blocks like this one, you can't use Markdown, so use <code>&lt;code&gt;</code> blocks to denote code.</aside>
-<h3 id='http-request-2'>HTTP Request</h3>
-<p><code>GET http://example.com/kittens/&lt;ID&gt;</code></p>
-<h3 id='url-parameters'>URL Parameters</h3>
-<table><thead>
-<tr>
-<th>Parameter</th>
-<th>Description</th>
-</tr>
-</thead><tbody>
-<tr>
-<td>ID</td>
-<td>The ID of the kitten to retrieve</td>
-</tr>
-</tbody></table>
-<h2 id='delete-a-specific-kitten'>Delete a Specific Kitten</h2><pre class="highlight ruby tab-ruby"><code><span class="nb">require</span> <span class="s1">'kittn'</span>
+<hr>
+<h4 id='haspendingsubtasks'><code>HasPendingSubtasks</code></h4><pre class="highlight proto tab-protobuf"><code><span class="k">rpc</span> <span class="n">HasPendingSubtasks</span> <span class="p">(</span><span class="n">HasPendingSubtasksRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">HasPendingSubtasksReply</span><span class="p">)</span> <span class="p">{}</span>
 
-<span class="n">api</span> <span class="o">=</span> <span class="no">Kittn</span><span class="o">::</span><span class="no">APIClient</span><span class="p">.</span><span class="nf">authorize!</span><span class="p">(</span><span class="s1">'meowmeowmeow'</span><span class="p">)</span>
-<span class="n">api</span><span class="p">.</span><span class="nf">kittens</span><span class="p">.</span><span class="nf">delete</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</code></pre><pre class="highlight python tab-python"><code><span class="kn">import</span> <span class="nn">kittn</span>
+<span class="kd">message</span> <span class="nc">HasPendingSubtasksRequest</span> <span class="p">{</span>
+  <span class="kt">string</span> <span class="na">task_id</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
 
-<span class="n">api</span> <span class="o">=</span> <span class="n">kittn</span><span class="o">.</span><span class="n">authorize</span><span class="p">(</span><span class="s">'meowmeowmeow'</span><span class="p">)</span>
-<span class="n">api</span><span class="o">.</span><span class="n">kittens</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</code></pre><pre class="highlight shell tab-shell"><code>curl <span class="s2">"http://example.com/api/kittens/2"</span>
-  -X DELETE
-  -H <span class="s2">"Authorization: meowmeowmeow"</span>
-</code></pre><pre class="highlight javascript tab-javascript"><code><span class="kr">const</span> <span class="nx">kittn</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'kittn'</span><span class="p">);</span>
-
-<span class="kd">let</span> <span class="nx">api</span> <span class="o">=</span> <span class="nx">kittn</span><span class="p">.</span><span class="nx">authorize</span><span class="p">(</span><span class="s1">'meowmeowmeow'</span><span class="p">);</span>
-<span class="kd">let</span> <span class="nx">max</span> <span class="o">=</span> <span class="nx">api</span><span class="p">.</span><span class="nx">kittens</span><span class="p">.</span><span class="k">delete</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+<span class="kd">message</span> <span class="nc">HasPendingSubtasksReply</span> <span class="p">{</span>
+  <span class="kt">bool</span> <span class="na">has_pending_subtasks</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
 </code></pre>
-<blockquote>
-<p>The above command returns JSON structured like this:</p>
-</blockquote>
-<pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
-  </span><span class="s2">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w">
-  </span><span class="s2">"deleted"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">":("</span><span class="w">
-</span><span class="p">}</span><span class="w">
-</span></code></pre>
-<p>This endpoint deletes a specific kitten.</p>
-<h3 id='http-request-3'>HTTP Request</h3>
-<p><code>DELETE http://example.com/kittens/&lt;ID&gt;</code></p>
-<h3 id='url-parameters-2'>URL Parameters</h3>
-<table><thead>
-<tr>
-<th>Parameter</th>
-<th>Description</th>
-</tr>
-</thead><tbody>
-<tr>
-<td>ID</td>
-<td>The ID of the kitten to delete</td>
-</tr>
-</tbody></table>
+<ul>
+<li><p>takes one argument <code>task_id</code></p></li>
+<li><p>returns a boolean indicating whether there are any more pending subtasks waiting for computation at given moment</p></li>
+<li><p>in case when it returns <code>true</code>, the next <code>NextSubtask</code> call should return successfully</p></li>
+</ul>
+
+<hr>
+<h4 id='verify'><code>Verify</code></h4><pre class="highlight proto tab-protobuf"><code><span class="k">rpc</span> <span class="n">Verify</span> <span class="p">(</span><span class="n">VerifyRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">VerifyReply</span><span class="p">)</span> <span class="p">{}</span>
+
+<span class="kd">message</span> <span class="nc">VerifyRequest</span> <span class="p">{</span>
+  <span class="kt">string</span> <span class="na">task_id</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="kt">string</span> <span class="na">subtask_id</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kd">message</span> <span class="nc">VerifyReply</span> <span class="p">{</span>
+  <span class="kt">bool</span> <span class="na">success</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre>
+<ul>
+<li><p>takes two arguments, <code>task_id</code> and <code>subtask_id</code> which specify which subtask results should be verified</p></li>
+<li><p>will be called with only valid <code>task_id</code> and <code>subtask_id</code> values</p></li>
+<li><p>returns a boolean indicating whether results passed the verification or not</p></li>
+<li><p>for successfully verified subtasks it most likely should also perform merging the partial results into the final one</p></li>
+</ul>
+
+<hr>
+<h4 id='discardsubtasks'><code>DiscardSubtasks</code></h4><pre class="highlight proto tab-protobuf"><code><span class="k">rpc</span> <span class="n">DiscardSubtasks</span> <span class="p">(</span><span class="n">DiscardSubtasksRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">DiscardSubtasksReply</span><span class="p">)</span> <span class="p">{}</span>
+
+<span class="kd">message</span> <span class="nc">DiscardSubtasksRequest</span> <span class="p">{</span>
+  <span class="kt">string</span> <span class="na">task_id</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="k">repeated</span> <span class="kt">string</span> <span class="na">subtask_ids</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kd">message</span> <span class="nc">DiscardSubtasksReply</span> <span class="p">{</span>
+  <span class="k">repeated</span> <span class="kt">string</span> <span class="na">discarded_subtask_ids</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre>
+<ul>
+<li><p>takes two arguments, <code>task_id</code> and <code>subtask_ids</code></p></li>
+<li><p>should discard results of given subtasks and any dependent subtasks</p></li>
+<li><p>returns list of subtask IDs that have been discarded</p></li>
+<li><p>in a simple case where subtasks are independent from each other it will return the same list as it received</p></li>
+</ul>
+
+<hr>
+<h4 id='benchmark'><code>Benchmark</code></h4><pre class="highlight proto tab-protobuf"><code><span class="k">rpc</span> <span class="n">RunBenchmark</span> <span class="p">(</span><span class="n">RunBenchmarkRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">RunBenchmarkReply</span><span class="p">)</span> <span class="p">{}</span>
+
+<span class="kd">message</span> <span class="nc">RunBenchmarkRequest</span> <span class="p">{</span>
+<span class="p">}</span>
+
+<span class="kd">message</span> <span class="nc">RunBenchmarkReply</span> <span class="p">{</span>
+  <span class="kt">float</span> <span class="na">score</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+
+</code></pre>
+<ul>
+<li><p>takes no arguments</p></li>
+<li><p>returns a score which indicates how efficient the machine is for this type of tasks</p></li>
+<li><p>shouldn&#39;t take much time (preferably less than a minute for medium range machines)</p></li>
+</ul>
+
+<hr>
+<h4 id='shutdown'><code>Shutdown</code></h4><pre class="highlight proto tab-protobuf"><code><span class="k">rpc</span> <span class="n">Shutdown</span> <span class="p">(</span><span class="n">ShutdownRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">ShutdownReply</span><span class="p">)</span> <span class="p">{}</span>
+
+<span class="kd">message</span> <span class="nc">ShutdownRequest</span> <span class="p">{</span>
+<span class="p">}</span>
+
+<span class="kd">message</span> <span class="nc">ShutdownReply</span> <span class="p">{</span>
+<span class="p">}</span>
+
+</code></pre>
+<ul>
+<li><p>takes no arguments</p></li>
+<li><p>should gracefully terminate the service</p></li>
+</ul>
+
+<p>When the last subtask is successfully verified on the requestor&#39;s side, the <code>work_dir/task_id/constants.RESULTS</code> directory should contain all result files and nothing else.</p>
+
+<hr>
+<h3 id='provider'>Provider</h3><pre class="highlight proto tab-protobuf"><code><span class="kd">service</span> <span class="n">ProviderApp</span> <span class="p">{</span>
+  <span class="k">rpc</span> <span class="n">Compute</span> <span class="p">(</span><span class="n">ComputeRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">ComputeReply</span><span class="p">)</span> <span class="p">{}</span>
+  <span class="k">rpc</span> <span class="n">RunBenchmark</span> <span class="p">(</span><span class="n">RunBenchmarkRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">RunBenchmarkReply</span><span class="p">)</span> <span class="p">{}</span>
+<span class="p">}</span>
+</code></pre>
+<p>Provider app should implement a short-lived RPC service which implements the <code>ProviderApp</code> interface from the proto files. Short-lived means that there will be only one request issued per service instance, i.e. the service should shutdown automatically after handling the first and only request.</p>
+<h4 id='rpc-commands'>RPC commands</h4><h4 id='compute'><code>Compute</code></h4>
+<ul>
+<li><p>gets a single working directory <code>task_work_dir</code> to operate on</p></li>
+<li><p>different subtasks of the same task will have the same <code>task_work_dir</code></p></li>
+<li><p>takes <code>task_id</code>, <code>subtask_id</code>, <code>subtask_params_json</code> as arguments</p></li>
+<li><p>can assume the <code>{task_work_dir}/{constants.NETWORK_RESOURCES}</code> directory exists</p></li>
+<li><p>can assume that under <code>{task_work_dir}/{constants.NETWORK_RESOURCES}</code> are the resources specified in the corresponding <code>NextSubtask</code> call</p></li>
+<li><p>returns a filepath (relative to the <code>task_work_dir</code>) of the result file which will be sent back to the requestor with unchanged name</p></li>
+</ul>
+<h4 id='benchmark-2'><code>Benchmark</code></h4>
+<ul>
+<li><p>takes no arguments</p></li>
+<li><p>returns a score which indicates how efficient the machine is for this type of tasks</p></li>
+<li><p>shouldn&#39;t take much time (preferably less than a minute for medium range machines)</p></li>
+</ul>
 <h1 id='errors'>Errors</h1>
 <aside class="notice">
 This error section is stored in a separate file in <code>includes/_errors.md</code>. Slate allows you to optionally separate out your docs into many files...just save them to the <code>includes</code> folder and add them to the top of your <code>index.md</code>'s frontmatter. Files are included in the order listed.
@@ -494,10 +496,7 @@ This error section is stored in a separate file in <code>includes/_errors.md</co
       </div>
       <div class="dark-box">
           <div class="lang-selector">
-                <a href="#" data-language-name="shell">shell</a>
-                <a href="#" data-language-name="ruby">ruby</a>
-                <a href="#" data-language-name="python">python</a>
-                <a href="#" data-language-name="javascript">javascript</a>
+                <a href="#" data-language-name="protobuf">protobuf</a>
           </div>
       </div>
     </div>
