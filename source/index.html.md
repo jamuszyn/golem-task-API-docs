@@ -30,7 +30,7 @@ If you don't see a programming language you're interested in, feel free to creat
 
 The API is divided into two independent parts - **requestor** and **provider**.
 
-### Requestor
+## Requestor
 > Requestor
 
 ```proto
@@ -59,11 +59,10 @@ The app should assume it will have access to a single directory (let's call it `
 
 - `{task_id}/{constants.NETWORK_RESULTS}`
 
----
-#### RPC methods
 
+### RPC methods
 
-#### `CreateTask`
+### CreateTask
 
 ```proto
 rpc CreateTask (CreateTaskRequest) returns (CreateTaskReply) {}
@@ -86,9 +85,9 @@ message CreateTaskReply {
 
   - can assume `{task_id}/{constants.RESOURCES}` contains all the resources provided by task creator
 
----
 
-#### `NextSubtask`
+
+### NextSubtask
 
 ```proto
 rpc NextSubtask (NextSubtaskRequest) returns (NextSubtaskReply) {}
@@ -111,9 +110,9 @@ message NextSubtaskReply {
 
   - also returns `subtask_params_json` which is the JSON string containing subtask specific parameters
 
----
 
-#### `HasPendingSubtasks`
+
+### HasPendingSubtasks
 
 ```proto
 rpc HasPendingSubtasks (HasPendingSubtasksRequest) returns (HasPendingSubtasksReply) {}
@@ -132,9 +131,9 @@ message HasPendingSubtasksReply {
 
   - in case when it returns `true`, the next `NextSubtask` call should return successfully
 
----
 
-#### `Verify`
+
+### Verify
 
 ```proto
 rpc Verify (VerifyRequest) returns (VerifyReply) {}
@@ -156,9 +155,9 @@ message VerifyReply {
 
   - for successfully verified subtasks it most likely should also perform merging the partial results into the final one
 
----
 
-#### `DiscardSubtasks`
+
+### DiscardSubtasks
 
 ```proto
 rpc DiscardSubtasks (DiscardSubtasksRequest) returns (DiscardSubtasksReply) {}
@@ -180,9 +179,9 @@ message DiscardSubtasksReply {
 
   - in a simple case where subtasks are independent from each other it will return the same list as it received
 
----
 
-#### `Benchmark`
+
+### Benchmark
 
 ```proto
 rpc RunBenchmark (RunBenchmarkRequest) returns (RunBenchmarkReply) {}
@@ -201,9 +200,9 @@ message RunBenchmarkReply {
 
   - shouldn't take much time (preferably less than a minute for medium range machines)
 
----
 
-#### `Shutdown`
+
+### Shutdown
 
 ```proto
 rpc Shutdown (ShutdownRequest) returns (ShutdownReply) {}
@@ -223,7 +222,7 @@ When the last subtask is successfully verified on the requestor's side, the `wor
 
 ---
 
-### Provider
+## Provider
 
 ```proto
 service ProviderApp {
@@ -235,9 +234,9 @@ service ProviderApp {
 Provider app should implement a short-lived RPC service which implements the `ProviderApp` interface from the proto files. Short-lived means that there will be only one request issued per service instance, i.e. the service should shutdown automatically after handling the first and only request.
 
 
-#### RPC commands
+### RPC commands
 
-#### `Compute`
+### Compute
 
   - gets a single working directory `task_work_dir` to operate on
 
@@ -251,7 +250,7 @@ Provider app should implement a short-lived RPC service which implements the `Pr
 
   - returns a filepath (relative to the `task_work_dir`) of the result file which will be sent back to the requestor with unchanged name
 
-#### `Benchmark`
+### Benchmark
 
   - takes no arguments
 
