@@ -258,7 +258,7 @@
 If you don&#39;t see a programming language you&#39;re interested in, feel free to create an issue or even a pull request and we will add it.</p>
 <h1 id='the-api'>The API</h1>
 <p>The API is divided into two independent parts - <strong>requestor</strong> and <strong>provider</strong>.</p>
-<h3 id='requestor'>Requestor</h3>
+<h2 id='requestor'>Requestor</h2>
 <blockquote>
 <p>Requestor</p>
 </blockquote>
@@ -283,9 +283,7 @@ The app should assume it will have access to a single directory (let&#39;s call 
 <li><p><code>{task_id}/{constants.RESULTS}</code></p></li>
 <li><p><code>{task_id}/{constants.NETWORK_RESULTS}</code></p></li>
 </ul>
-
-<hr>
-<h4 id='rpc-methods'>RPC methods</h4><h4 id='createtask'><code>CreateTask</code></h4><pre class="highlight proto tab-protobuf"><code><span class="k">rpc</span> <span class="n">CreateTask</span> <span class="p">(</span><span class="n">CreateTaskRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">CreateTaskReply</span><span class="p">)</span> <span class="p">{}</span>
+<h3 id='rpc-methods'>RPC methods</h3><h3 id='createtask'>CreateTask</h3><pre class="highlight proto tab-protobuf"><code><span class="k">rpc</span> <span class="n">CreateTask</span> <span class="p">(</span><span class="n">CreateTaskRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">CreateTaskReply</span><span class="p">)</span> <span class="p">{}</span>
 
 <span class="kd">message</span> <span class="nc">CreateTaskRequest</span> <span class="p">{</span>
   <span class="kt">string</span> <span class="na">task_id</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
@@ -302,9 +300,7 @@ The app should assume it will have access to a single directory (let&#39;s call 
 <li><p>will only be called once with given <code>task_id</code></p></li>
 <li><p>can assume <code>{task_id}/{constants.RESOURCES}</code> contains all the resources provided by task creator</p></li>
 </ul>
-
-<hr>
-<h4 id='nextsubtask'><code>NextSubtask</code></h4><pre class="highlight proto tab-protobuf"><code><span class="k">rpc</span> <span class="n">NextSubtask</span> <span class="p">(</span><span class="n">NextSubtaskRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">NextSubtaskReply</span><span class="p">)</span> <span class="p">{}</span>
+<h3 id='nextsubtask'>NextSubtask</h3><pre class="highlight proto tab-protobuf"><code><span class="k">rpc</span> <span class="n">NextSubtask</span> <span class="p">(</span><span class="n">NextSubtaskRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">NextSubtaskReply</span><span class="p">)</span> <span class="p">{}</span>
 
 <span class="kd">message</span> <span class="nc">NextSubtaskRequest</span> <span class="p">{</span>
     <span class="kt">string</span> <span class="na">task_id</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
@@ -322,9 +318,7 @@ The app should assume it will have access to a single directory (let&#39;s call 
 <li><p>returns <code>subtask_id</code> which has to be a string without whitespaces and slashes (<code>/</code>) but the same string cannot be returned more than once</p></li>
 <li><p>also returns <code>subtask_params_json</code> which is the JSON string containing subtask specific parameters</p></li>
 </ul>
-
-<hr>
-<h4 id='haspendingsubtasks'><code>HasPendingSubtasks</code></h4><pre class="highlight proto tab-protobuf"><code><span class="k">rpc</span> <span class="n">HasPendingSubtasks</span> <span class="p">(</span><span class="n">HasPendingSubtasksRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">HasPendingSubtasksReply</span><span class="p">)</span> <span class="p">{}</span>
+<h3 id='haspendingsubtasks'>HasPendingSubtasks</h3><pre class="highlight proto tab-protobuf"><code><span class="k">rpc</span> <span class="n">HasPendingSubtasks</span> <span class="p">(</span><span class="n">HasPendingSubtasksRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">HasPendingSubtasksReply</span><span class="p">)</span> <span class="p">{}</span>
 
 <span class="kd">message</span> <span class="nc">HasPendingSubtasksRequest</span> <span class="p">{</span>
   <span class="kt">string</span> <span class="na">task_id</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
@@ -339,9 +333,7 @@ The app should assume it will have access to a single directory (let&#39;s call 
 <li><p>returns a boolean indicating whether there are any more pending subtasks waiting for computation at given moment</p></li>
 <li><p>in case when it returns <code>true</code>, the next <code>NextSubtask</code> call should return successfully</p></li>
 </ul>
-
-<hr>
-<h4 id='verify'><code>Verify</code></h4><pre class="highlight proto tab-protobuf"><code><span class="k">rpc</span> <span class="n">Verify</span> <span class="p">(</span><span class="n">VerifyRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">VerifyReply</span><span class="p">)</span> <span class="p">{}</span>
+<h3 id='verify'>Verify</h3><pre class="highlight proto tab-protobuf"><code><span class="k">rpc</span> <span class="n">Verify</span> <span class="p">(</span><span class="n">VerifyRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">VerifyReply</span><span class="p">)</span> <span class="p">{}</span>
 
 <span class="kd">message</span> <span class="nc">VerifyRequest</span> <span class="p">{</span>
   <span class="kt">string</span> <span class="na">task_id</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
@@ -358,9 +350,7 @@ The app should assume it will have access to a single directory (let&#39;s call 
 <li><p>returns a boolean indicating whether results passed the verification or not</p></li>
 <li><p>for successfully verified subtasks it most likely should also perform merging the partial results into the final one</p></li>
 </ul>
-
-<hr>
-<h4 id='discardsubtasks'><code>DiscardSubtasks</code></h4><pre class="highlight proto tab-protobuf"><code><span class="k">rpc</span> <span class="n">DiscardSubtasks</span> <span class="p">(</span><span class="n">DiscardSubtasksRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">DiscardSubtasksReply</span><span class="p">)</span> <span class="p">{}</span>
+<h3 id='discardsubtasks'>DiscardSubtasks</h3><pre class="highlight proto tab-protobuf"><code><span class="k">rpc</span> <span class="n">DiscardSubtasks</span> <span class="p">(</span><span class="n">DiscardSubtasksRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">DiscardSubtasksReply</span><span class="p">)</span> <span class="p">{}</span>
 
 <span class="kd">message</span> <span class="nc">DiscardSubtasksRequest</span> <span class="p">{</span>
   <span class="kt">string</span> <span class="na">task_id</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
@@ -377,9 +367,7 @@ The app should assume it will have access to a single directory (let&#39;s call 
 <li><p>returns list of subtask IDs that have been discarded</p></li>
 <li><p>in a simple case where subtasks are independent from each other it will return the same list as it received</p></li>
 </ul>
-
-<hr>
-<h4 id='benchmark'><code>Benchmark</code></h4><pre class="highlight proto tab-protobuf"><code><span class="k">rpc</span> <span class="n">RunBenchmark</span> <span class="p">(</span><span class="n">RunBenchmarkRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">RunBenchmarkReply</span><span class="p">)</span> <span class="p">{}</span>
+<h3 id='benchmark'>Benchmark</h3><pre class="highlight proto tab-protobuf"><code><span class="k">rpc</span> <span class="n">RunBenchmark</span> <span class="p">(</span><span class="n">RunBenchmarkRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">RunBenchmarkReply</span><span class="p">)</span> <span class="p">{}</span>
 
 <span class="kd">message</span> <span class="nc">RunBenchmarkRequest</span> <span class="p">{</span>
 <span class="p">}</span>
@@ -394,9 +382,7 @@ The app should assume it will have access to a single directory (let&#39;s call 
 <li><p>returns a score which indicates how efficient the machine is for this type of tasks</p></li>
 <li><p>shouldn&#39;t take much time (preferably less than a minute for medium range machines)</p></li>
 </ul>
-
-<hr>
-<h4 id='shutdown'><code>Shutdown</code></h4><pre class="highlight proto tab-protobuf"><code><span class="k">rpc</span> <span class="n">Shutdown</span> <span class="p">(</span><span class="n">ShutdownRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">ShutdownReply</span><span class="p">)</span> <span class="p">{}</span>
+<h3 id='shutdown'>Shutdown</h3><pre class="highlight proto tab-protobuf"><code><span class="k">rpc</span> <span class="n">Shutdown</span> <span class="p">(</span><span class="n">ShutdownRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">ShutdownReply</span><span class="p">)</span> <span class="p">{}</span>
 
 <span class="kd">message</span> <span class="nc">ShutdownRequest</span> <span class="p">{</span>
 <span class="p">}</span>
@@ -413,13 +399,13 @@ The app should assume it will have access to a single directory (let&#39;s call 
 <p>When the last subtask is successfully verified on the requestor&#39;s side, the <code>work_dir/task_id/constants.RESULTS</code> directory should contain all result files and nothing else.</p>
 
 <hr>
-<h3 id='provider'>Provider</h3><pre class="highlight proto tab-protobuf"><code><span class="kd">service</span> <span class="n">ProviderApp</span> <span class="p">{</span>
+<h2 id='provider'>Provider</h2><pre class="highlight proto tab-protobuf"><code><span class="kd">service</span> <span class="n">ProviderApp</span> <span class="p">{</span>
   <span class="k">rpc</span> <span class="n">Compute</span> <span class="p">(</span><span class="n">ComputeRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">ComputeReply</span><span class="p">)</span> <span class="p">{}</span>
   <span class="k">rpc</span> <span class="n">RunBenchmark</span> <span class="p">(</span><span class="n">RunBenchmarkRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">RunBenchmarkReply</span><span class="p">)</span> <span class="p">{}</span>
 <span class="p">}</span>
 </code></pre>
 <p>Provider app should implement a short-lived RPC service which implements the <code>ProviderApp</code> interface from the proto files. Short-lived means that there will be only one request issued per service instance, i.e. the service should shutdown automatically after handling the first and only request.</p>
-<h4 id='rpc-commands'>RPC commands</h4><h4 id='compute'><code>Compute</code></h4>
+<h3 id='rpc-commands'>RPC commands</h3><h3 id='compute'>Compute</h3>
 <ul>
 <li><p>gets a single working directory <code>task_work_dir</code> to operate on</p></li>
 <li><p>different subtasks of the same task will have the same <code>task_work_dir</code></p></li>
@@ -428,7 +414,7 @@ The app should assume it will have access to a single directory (let&#39;s call 
 <li><p>can assume that under <code>{task_work_dir}/{constants.NETWORK_RESOURCES}</code> are the resources specified in the corresponding <code>NextSubtask</code> call</p></li>
 <li><p>returns a filepath (relative to the <code>task_work_dir</code>) of the result file which will be sent back to the requestor with unchanged name</p></li>
 </ul>
-<h4 id='benchmark-2'><code>Benchmark</code></h4>
+<h3 id='benchmark-2'>Benchmark</h3>
 <ul>
 <li><p>takes no arguments</p></li>
 <li><p>returns a score which indicates how efficient the machine is for this type of tasks</p></li>
