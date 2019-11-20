@@ -5,11 +5,13 @@ language_tabs: # must be one of https://git.io/vQNgJ
   - protobuf
 
 toc_footers:
-  - <a href='#'>Sign Up for a Developer Key</a>
   - <a href='https://docs.golem.network'>Main documentation</a>
-
-includes:
-  - errors
+  - <a href='https://golem.network'>Website</a>
+  - <a href='https://chat.golem.network'>Chat</a>
+  - <a href='https://twitter.com/golemproject'>Twitter</a>
+  - <a href='https://www.reddit.com/r/GolemProject'>Reddit</a>
+  - <a href='https://www.facebook.com/golemproject/'>Facebook</a>
+  - <a href='https://blog.golem.network'>Blog</a>
 
 search: true
 ---
