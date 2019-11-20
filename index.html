@@ -269,69 +269,77 @@ If you don&#39;t see a programming language you&#39;re interested in, feel free 
   <span class="k">rpc</span> <span class="n">DiscardSubtasks</span> <span class="p">(</span><span class="n">DiscardSubtasksRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">DiscardSubtasksReply</span><span class="p">)</span> <span class="p">{}</span>
   <span class="k">rpc</span> <span class="n">RunBenchmark</span> <span class="p">(</span><span class="n">RunBenchmarkRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">RunBenchmarkReply</span><span class="p">)</span> <span class="p">{}</span>
   <span class="k">rpc</span> <span class="n">HasPendingSubtasks</span> <span class="p">(</span><span class="n">HasPendingSubtasksRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">HasPendingSubtasksReply</span><span class="p">)</span> <span class="p">{}</span>
+  <span class="k">rpc</span> <span class="n">AbortTask</span> <span class="p">(</span><span class="n">AbortTaskRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">AbortTaskReply</span><span class="p">)</span> <span class="p">{}</span>
+  <span class="k">rpc</span> <span class="n">AbortSubtask</span> <span class="p">(</span><span class="n">AbortSubtaskRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">AbortSubtaskReply</span><span class="p">)</span> <span class="p">{}</span>
 
   <span class="k">rpc</span> <span class="n">Shutdown</span> <span class="p">(</span><span class="n">ShutdownRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">ShutdownReply</span><span class="p">)</span> <span class="p">{}</span>
 <span class="p">}</span>
 </code></pre>
-<p>For requestor the app should implement a long running RPC service which implements the <code>RequestorApp</code> interface from the proto files. 
-The app should assume it will have access to a single directory (let&#39;s call it <code>work_dir</code>). Each task will have its own separate working directory under the main <code>work_dir</code>. You can assume that for a given <code>task_id</code> the first call will always be <code>CreateTask</code> and the following directories will exist under <code>work_dir</code> and they will be empty:</p>
+<p>For requestor the app should implement a long running RPC service which implements the <code>RequestorApp</code> interface from the proto files. The app should assume it will have access to a single directory (let&#39;s call it <code>work_dir</code>). Each task will have its own separate working directory under the main <code>work_dir</code>. You can assume that for a given <code>task_id</code> the first call will always be <code>CreateTask</code> and the following directories will exist under <code>work_dir</code> and they will be empty:</p>
 
 <ul>
-<li><p><code>{task_id}</code></p></li>
-<li><p><code>{task_id}/{constants.RESOURCES}</code></p></li>
-<li><p><code>{task_id}/{constants.NETWORK_RESOURCES}</code></p></li>
-<li><p><code>{task_id}/{constants.RESULTS}</code></p></li>
-<li><p><code>{task_id}/{constants.NETWORK_RESULTS}</code></p></li>
+<li><code>{task_id}</code></li>
+<li><code>{task_id}/{constants.TASK_INPUTS_DIR}</code></li>
+<li><code>{task_id}/{constants.SUBTASK_INPUTS_DIR}</code></li>
+<li><code>{task_id}/{constants.TASK_OUTPUTS_DIR}</code></li>
+<li><code>{task_id}/{constants.SUBTASK_OUTPUTS_DIR}</code></li>
 </ul>
 <h3 id='rpc-methods'>RPC methods</h3><h3 id='createtask'>CreateTask</h3><pre class="highlight proto tab-protobuf"><code><span class="k">rpc</span> <span class="n">CreateTask</span> <span class="p">(</span><span class="n">CreateTaskRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">CreateTaskReply</span><span class="p">)</span> <span class="p">{}</span>
 
 <span class="kd">message</span> <span class="nc">CreateTaskRequest</span> <span class="p">{</span>
   <span class="kt">string</span> <span class="na">task_id</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
-  <span class="kt">string</span> <span class="na">task_params_json</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+  <span class="kt">int32</span> <span class="na">max_subtasks_count</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+  <span class="kt">string</span> <span class="na">task_params_json</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
 <span class="p">}</span>
 
 <span class="kd">message</span> <span class="nc">CreateTaskReply</span> <span class="p">{</span>
+  <span class="kt">string</span> <span class="na">env_id</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="kt">string</span> <span class="na">prerequisites_json</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+  <span class="n">Infrastructure</span> <span class="na">inf_requirements</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kd">message</span> <span class="nc">Infrastructure</span> <span class="p">{</span>
+  <span class="kt">float</span> <span class="na">min_memory_mib</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre>
 <ul>
-<li><p>takes two arguments <code>task_id</code> and <code>task_params_json</code></p></li>
-<li><p>should treat <code>{work_dir}/{task_id}</code> as the working directory for the given task</p></li>
-<li><p><code>task_params_json</code> is a JSON string containing task specific parameters</p></li>
-<li><p>will only be called once with given <code>task_id</code></p></li>
-<li><p>can assume <code>{task_id}/{constants.RESOURCES}</code> contains all the resources provided by task creator</p></li>
+<li>Takes three arguments: <code>task_id</code>, <code>max_subtasks_count</code>, and <code>task_params_json</code>.</li>
+<li>Should treat <code>{work_dir}/{task_id}</code> as the working directory for the given task.</li>
+<li><code>task_params_json</code> is a JSON string containing app-specific task parameters. Format of these parameters is entirely up to the application developer.</li>
+<li>Will only be called once with given <code>task_id</code>.</li>
+<li>Can assume that <code>task_id</code> is unique per node.</li>
+<li>Can assume <code>{task_id}/{constants.TASK_INPUTS_DIR}</code> contains all the resources provided by task creator.</li>
+<li>Returns <code>env_id</code> and <code>prerequisites_json</code> specifying the environment and prerequisites required for providers to compute the task. See environments section for details.</li>
 </ul>
 <h3 id='nextsubtask'>NextSubtask</h3><pre class="highlight proto tab-protobuf"><code><span class="k">rpc</span> <span class="n">NextSubtask</span> <span class="p">(</span><span class="n">NextSubtaskRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">NextSubtaskReply</span><span class="p">)</span> <span class="p">{}</span>
 
 <span class="kd">message</span> <span class="nc">NextSubtaskRequest</span> <span class="p">{</span>
-    <span class="kt">string</span> <span class="na">task_id</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="kt">string</span> <span class="na">task_id</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="kt">string</span> <span class="na">subtask_id</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+  <span class="kt">string</span> <span class="na">opaque_node_id</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
 <span class="p">}</span>
 
 <span class="kd">message</span> <span class="nc">NextSubtaskReply</span> <span class="p">{</span>
-  <span class="kt">string</span> <span class="na">subtask_id</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
-  <span class="kt">string</span> <span class="na">subtask_params_json</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
-  <span class="k">repeated</span> <span class="kt">string</span> <span class="na">resources</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
+  <span class="c1">// workaround for the lack of null values in proto3
+</span>  <span class="c1">// where "one of" means "at most one of"
+</span>  <span class="k">oneof</span> <span class="n">subtask_oneof</span> <span class="p">{</span>
+      <span class="n">SubtaskReply</span> <span class="na">subtask</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">message</span> <span class="nc">SubtaskReply</span> <span class="p">{</span>
+  <span class="kt">string</span> <span class="na">subtask_params_json</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="k">repeated</span> <span class="kt">string</span> <span class="na">resources</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre>
 <ul>
-<li><p>takes one argument <code>task_id</code></p></li>
-<li><p>can assume <code>CreateTask</code> was called earlier with the same <code>task_id</code></p></li>
-<li><p>returns <code>subtask_id</code> which has to be a string without whitespaces and slashes (<code>/</code>) but the same string cannot be returned more than once</p></li>
-<li><p>also returns <code>subtask_params_json</code> which is the JSON string containing subtask specific parameters</p></li>
-</ul>
-<h3 id='haspendingsubtasks'>HasPendingSubtasks</h3><pre class="highlight proto tab-protobuf"><code><span class="k">rpc</span> <span class="n">HasPendingSubtasks</span> <span class="p">(</span><span class="n">HasPendingSubtasksRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">HasPendingSubtasksReply</span><span class="p">)</span> <span class="p">{}</span>
-
-<span class="kd">message</span> <span class="nc">HasPendingSubtasksRequest</span> <span class="p">{</span>
-  <span class="kt">string</span> <span class="na">task_id</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
-<span class="p">}</span>
-
-<span class="kd">message</span> <span class="nc">HasPendingSubtasksReply</span> <span class="p">{</span>
-  <span class="kt">bool</span> <span class="na">has_pending_subtasks</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
-<span class="p">}</span>
-</code></pre>
-<ul>
-<li><p>takes one argument <code>task_id</code></p></li>
-<li><p>returns a boolean indicating whether there are any more pending subtasks waiting for computation at given moment</p></li>
-<li><p>in case when it returns <code>true</code>, the next <code>NextSubtask</code> call should return successfully</p></li>
+<li>Takes three arguments: <code>task_id</code>, <code>subtask_id</code> and <code>opaque_node_id</code>.</li>
+<li><code>opaque_node_id</code> is an identifier of the node which is going to compute the requested subtask. &#39;Opaque&#39; means that the identifier doesn&#39;t allow to obtain any further information about the node (e.g. public key, IP address).</li>
+<li>Can assume that <code>subtask_id</code> is unique per node.</li>
+<li>Can assume <code>CreateTask</code> was called earlier with the same <code>task_id</code>.</li>
+<li>Can return an empty message meaning that the app refuses to assign a subtask to the provider node (for whatever reason).</li>
+<li>Returns <code>subtask_params_json</code> which is the JSON string containing subtask specific parameters.</li>
+<li>Also returns <code>resources</code> which is a list of names of files required for computing the subtask. Files with these names are required to be present in <code>{task_id}/{constants.SUBTASK_INPUTS_DIR}</code> directory.</li>
 </ul>
 <h3 id='verify'>Verify</h3><pre class="highlight proto tab-protobuf"><code><span class="k">rpc</span> <span class="n">Verify</span> <span class="p">(</span><span class="n">VerifyRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">VerifyReply</span><span class="p">)</span> <span class="p">{}</span>
 
@@ -341,14 +349,29 @@ The app should assume it will have access to a single directory (let&#39;s call 
 <span class="p">}</span>
 
 <span class="kd">message</span> <span class="nc">VerifyReply</span> <span class="p">{</span>
-  <span class="kt">bool</span> <span class="na">success</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="kd">enum</span> <span class="n">VerifyResult</span> <span class="p">{</span>
+    <span class="na">SUCCESS</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="na">FAILURE</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="na">AWAITING_DATA</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+    <span class="na">INCONCLUSIVE</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="n">VerifyResult</span> <span class="na">result</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="kt">string</span> <span class="na">reason</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre>
 <ul>
-<li><p>takes two arguments, <code>task_id</code> and <code>subtask_id</code> which specify which subtask results should be verified</p></li>
-<li><p>will be called with only valid <code>task_id</code> and <code>subtask_id</code> values</p></li>
-<li><p>returns a boolean indicating whether results passed the verification or not</p></li>
-<li><p>for successfully verified subtasks it most likely should also perform merging the partial results into the final one</p></li>
+<li>Takes two arguments: <code>task_id</code> and <code>subtask_id</code> which specify which subtask results should be verified.</li>
+<li>Will be called with only valid <code>task_id</code> and <code>subtask_id</code> values.</li>
+<li>Returns <code>result</code> which is one of the defined verification result statuses:
+
+<ul>
+<li><code>SUCCESS</code> - the subtask was computed correctly,</li>
+<li><code>FAILURE</code> - the subtask was computed incorrectly,</li>
+<li><code>INCONCLUSIVE</code> - cannot determine whether the subtask was computed correctly,</li>
+<li><code>AWAITING_DATA</code> - cannot perform verificaton until results of other subtasks are available.</li>
+</ul></li>
+<li>Also returns <code>reason</code> which is a string providing more detail about the result.</li>
+<li>For successfully verified subtasks it can also perform merging of the partial results into the final one.</li>
 </ul>
 <h3 id='discardsubtasks'>DiscardSubtasks</h3><pre class="highlight proto tab-protobuf"><code><span class="k">rpc</span> <span class="n">DiscardSubtasks</span> <span class="p">(</span><span class="n">DiscardSubtasksRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">DiscardSubtasksReply</span><span class="p">)</span> <span class="p">{}</span>
 
@@ -362,10 +385,10 @@ The app should assume it will have access to a single directory (let&#39;s call 
 <span class="p">}</span>
 </code></pre>
 <ul>
-<li><p>takes two arguments, <code>task_id</code> and <code>subtask_ids</code></p></li>
-<li><p>should discard results of given subtasks and any dependent subtasks</p></li>
-<li><p>returns list of subtask IDs that have been discarded</p></li>
-<li><p>in a simple case where subtasks are independent from each other it will return the same list as it received</p></li>
+<li>Takes two arguments: <code>task_id</code> and <code>subtask_ids</code>.</li>
+<li>Should discard results of given subtasks and any dependent subtasks.</li>
+<li>Returns list of subtask IDs that have been discarded.</li>
+<li>In a simple case where subtasks are independent from each other it will return the same list as it received.</li>
 </ul>
 <h3 id='benchmark'>Benchmark</h3><pre class="highlight proto tab-protobuf"><code><span class="k">rpc</span> <span class="n">RunBenchmark</span> <span class="p">(</span><span class="n">RunBenchmarkRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">RunBenchmarkReply</span><span class="p">)</span> <span class="p">{}</span>
 
@@ -375,50 +398,151 @@ The app should assume it will have access to a single directory (let&#39;s call 
 <span class="kd">message</span> <span class="nc">RunBenchmarkReply</span> <span class="p">{</span>
   <span class="kt">float</span> <span class="na">score</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
 <span class="p">}</span>
+</code></pre>
+<ul>
+<li>Takes no arguments.
+
+<ul>
+<li>Returns a score which indicates how efficient the machine is for this type of tasks.</li>
+<li>Shouldn&#39;t take much time (preferably less than a minute for medium range machines).</li>
+</ul></li>
+</ul>
+<h3 id='haspendingsubtasks'>HasPendingSubtasks</h3><pre class="highlight proto tab-protobuf"><code><span class="k">rpc</span> <span class="n">HasPendingSubtasks</span> <span class="p">(</span><span class="n">HasPendingSubtasksRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">HasPendingSubtasksReply</span><span class="p">)</span> <span class="p">{}</span>
+
+<span class="kd">message</span> <span class="nc">HasPendingSubtasksRequest</span> <span class="p">{</span>
+  <span class="kt">string</span> <span class="na">task_id</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kd">message</span> <span class="nc">HasPendingSubtasksReply</span> <span class="p">{</span>
+  <span class="kt">bool</span> <span class="na">has_pending_subtasks</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre>
+<ul>
+<li>Takes one argument <code>task_id</code>.</li>
+<li>Returns a boolean indicating whether there are any more pending subtasks waiting for computation at given moment.</li>
+<li>In case when it returns <code>true</code>, the next <code>NextSubtask</code> call should return successfully (although it can still return an empty message).</li>
+</ul>
+<h3 id='aborttask'>AbortTask</h3><pre class="highlight proto tab-protobuf"><code><span class="k">rpc</span> <span class="n">AbortTask</span> <span class="p">(</span><span class="n">AbortTaskRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">AbortTaskReply</span><span class="p">)</span> <span class="p">{}</span>
+
+<span class="kd">message</span> <span class="nc">AbortTaskRequest</span> <span class="p">{</span>
+  <span class="kt">string</span> <span class="na">task_id</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kd">message</span> <span class="nc">AbortTaskReply</span> <span class="p">{</span>
+<span class="p">}</span>
+</code></pre>
+<ul>
+<li>Takes one argument: <code>task_id</code>.</li>
+<li>Will be called when the task is aborted by the user or timed out. Should stop all running subtask verifications for this task and perform any other necessary cleanup.</li>
+</ul>
+<h3 id='abortsubtask'>AbortSubtask</h3><pre class="highlight proto tab-protobuf"><code><span class="k">rpc</span> <span class="n">AbortSubtask</span> <span class="p">(</span><span class="n">AbortSubtaskRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">AbortSubtaskReply</span><span class="p">)</span> <span class="p">{}</span>
+
+<span class="kd">message</span> <span class="nc">AbortSubtaskRequest</span> <span class="p">{</span>
+  <span class="kt">string</span> <span class="na">task_id</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="kt">string</span> <span class="na">subtask_id</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kd">message</span> <span class="nc">AbortSubtaskReply</span> <span class="p">{</span>
+<span class="p">}</span>
 
 </code></pre>
 <ul>
-<li><p>takes no arguments</p></li>
-<li><p>returns a score which indicates how efficient the machine is for this type of tasks</p></li>
-<li><p>shouldn&#39;t take much time (preferably less than a minute for medium range machines)</p></li>
+<li>Takes two arguments: <code>task_id</code> and <code>subtask_id</code>.</li>
+<li>Will be called when the subtask is aborted by the user or timed out. Should stop verification of the subtask (if it&#39;s running) and perform any other necessary cleanup.</li>
 </ul>
 <h3 id='shutdown'>Shutdown</h3><pre class="highlight proto tab-protobuf"><code><span class="k">rpc</span> <span class="n">Shutdown</span> <span class="p">(</span><span class="n">ShutdownRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">ShutdownReply</span><span class="p">)</span> <span class="p">{}</span>
 
-<span class="kd">message</span> <span class="nc">ShutdownRequest</span> <span class="p">{</span>
+<span class="n">mmessage</span> <span class="n">ShutdownRequest</span> <span class="p">{</span>
 <span class="p">}</span>
 
 <span class="kd">message</span> <span class="nc">ShutdownReply</span> <span class="p">{</span>
 <span class="p">}</span>
-
 </code></pre>
 <ul>
-<li><p>takes no arguments</p></li>
-<li><p>should gracefully terminate the service</p></li>
+<li>takes no arguments</li>
+<li>should gracefully terminate the service</li>
 </ul>
 
 <p>When the last subtask is successfully verified on the requestor&#39;s side, the <code>work_dir/task_id/constants.RESULTS</code> directory should contain all result files and nothing else.</p>
 
 <hr>
+<h3 id='environments'>Environments</h3>
+<p>Both provider and requestor apps run on top of Golem&#39;s execution environments. Environment for requestor is specified in the application definition and cannot vary. Provider environment is specified by the return value of <code>CreateTask</code> call. A single application could use different environments for different types of tasks, it could also use different environment for requestor and provider. Environments have their unique IDs and prerequisites formats. Prerequisites are additional requirements for the environment to run the app (e.g. Docker environment prerequisites specify image). Environment IDs and prerequisites formats are listed in <a href="https://github.com/golemfactory/task-api/blob/master/golem_task_api/proto/envs.proto">envs.proto</a> file.</p>
+
+<p>Currently the following environments are supported:
+- <code>docker_cpu</code> - standard Docker environment<br>
+  Prerequisites format:
+  <code>json
+  {
+      &quot;image&quot;: &quot;...&quot;,
+      &quot;tag&quot;:   &quot;...&quot;
+  }
+</code>
+- <code>docker_gpu</code> - GPU-enabled Docker environment, Linux only<br>
+  Prerequisites format: same as <code>docker_cpu</code></p>
+
+<hr>
 <h2 id='provider'>Provider</h2><pre class="highlight proto tab-protobuf"><code><span class="kd">service</span> <span class="n">ProviderApp</span> <span class="p">{</span>
   <span class="k">rpc</span> <span class="n">Compute</span> <span class="p">(</span><span class="n">ComputeRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">ComputeReply</span><span class="p">)</span> <span class="p">{}</span>
   <span class="k">rpc</span> <span class="n">RunBenchmark</span> <span class="p">(</span><span class="n">RunBenchmarkRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">RunBenchmarkReply</span><span class="p">)</span> <span class="p">{}</span>
+
+  <span class="k">rpc</span> <span class="n">Shutdown</span> <span class="p">(</span><span class="n">ShutdownRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">ShutdownReply</span><span class="p">)</span> <span class="p">{}</span>
 <span class="p">}</span>
+
 </code></pre>
 <p>Provider app should implement a short-lived RPC service which implements the <code>ProviderApp</code> interface from the proto files. Short-lived means that there will be only one request issued per service instance, i.e. the service should shutdown automatically after handling the first and only request.</p>
-<h3 id='rpc-commands'>RPC commands</h3><h3 id='compute'>Compute</h3>
+<h3 id='rpc-commands'>RPC commands</h3><h3 id='compute'>Compute</h3><pre class="highlight proto tab-protobuf"><code><span class="k">rpc</span> <span class="n">Compute</span> <span class="p">(</span><span class="n">ComputeRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">ComputeReply</span><span class="p">)</span> <span class="p">{}</span>
+
+<span class="kd">message</span> <span class="nc">ComputeRequest</span> <span class="p">{</span>
+  <span class="kt">string</span> <span class="na">task_id</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="kt">string</span> <span class="na">subtask_id</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+  <span class="kt">string</span> <span class="na">subtask_params_json</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kd">message</span> <span class="nc">ComputeReply</span> <span class="p">{</span>
+  <span class="kt">string</span> <span class="na">output_filepath</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre>
+<p><code>Compute</code>
+  - Gets a single working directory <code>task_work_dir</code> to operate on.
+  - Different subtasks of the same task will have the same <code>task_work_dir</code>.
+  - Takes <code>task_id</code>, <code>subtask_id</code>, <code>subtask_params_json</code> as arguments.
+  - Can assume the <code>{task_work_dir}/{constants.SUBTASK_INPUTS_DIR}</code> directory exists.
+  - Can assume that under <code>{task_work_dir}/{constants.SUBTASK_INPUTS_DIR}</code> are the resources specified in the corresponding</p>
+<h3 id='nextsubtask-call'>NextSubtask call.</h3><pre class="highlight proto tab-protobuf"><code>
+</code></pre>
 <ul>
-<li><p>gets a single working directory <code>task_work_dir</code> to operate on</p></li>
-<li><p>different subtasks of the same task will have the same <code>task_work_dir</code></p></li>
-<li><p>takes <code>task_id</code>, <code>subtask_id</code>, <code>subtask_params_json</code> as arguments</p></li>
-<li><p>can assume the <code>{task_work_dir}/{constants.NETWORK_RESOURCES}</code> directory exists</p></li>
-<li><p>can assume that under <code>{task_work_dir}/{constants.NETWORK_RESOURCES}</code> are the resources specified in the corresponding <code>NextSubtask</code> call</p></li>
-<li><p>returns a filepath (relative to the <code>task_work_dir</code>) of the result file which will be sent back to the requestor with unchanged name</p></li>
+<li>Returns a filepath (relative to the <code>task_work_dir</code>) of the result file which will be sent back to the requestor with unchanged name.</li>
 </ul>
-<h3 id='benchmark-2'>Benchmark</h3>
+<h3 id='benchmark-2'>Benchmark</h3><pre class="highlight proto tab-protobuf"><code><span class="k">rpc</span> <span class="n">RunBenchmark</span> <span class="p">(</span><span class="n">RunBenchmarkRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">RunBenchmarkReply</span><span class="p">)</span> <span class="p">{}</span>
+
+<span class="kd">message</span> <span class="nc">RunBenchmarkRequest</span> <span class="p">{</span>
+<span class="p">}</span>
+
+<span class="kd">message</span> <span class="nc">RunBenchmarkReply</span> <span class="p">{</span>
+  <span class="kt">float</span> <span class="na">score</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre>
 <ul>
-<li><p>takes no arguments</p></li>
-<li><p>returns a score which indicates how efficient the machine is for this type of tasks</p></li>
-<li><p>shouldn&#39;t take much time (preferably less than a minute for medium range machines)</p></li>
+<li>Takes no arguments.</li>
+<li>Returns a score which indicates how efficient the machine is for this type of tasks.</li>
+<li>Shouldn&#39;t take much time (preferably less than a minute for medium range machines).</li>
+</ul>
+<h3 id='shutdown-2'>Shutdown</h3><pre class="highlight proto tab-protobuf"><code><span class="k">rpc</span> <span class="n">Shutdown</span> <span class="p">(</span><span class="n">ShutdownRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">ShutdownReply</span><span class="p">)</span> <span class="p">{}</span>
+
+<span class="n">mmessage</span> <span class="n">ShutdownRequest</span> <span class="p">{</span>
+<span class="p">}</span>
+
+<span class="kd">message</span> <span class="nc">ShutdownReply</span> <span class="p">{</span>
+<span class="p">}</span>
+</code></pre>
+<ul>
+<li>Takes no arguments.
+
+<ul>
+<li>Should gracefully terminate the service.</li>
+<li>Can be called in case the provider wants to interrupt task computation or benchmark.</li>
+</ul></li>
 </ul>
 <h1 id='errors'>Errors</h1>
 <aside class="notice">
